@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ChessClub.Database\ChessClub.Database.csproj" />
+  </ItemGroup>
+
 </Project>
