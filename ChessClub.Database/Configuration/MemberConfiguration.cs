@@ -21,6 +21,10 @@ namespace ChessClub.Database.Configuration
                 .IsRequired()
                 .HasMaxLength(100);
 
+            builder.Property(o => o.Email)
+                .IsRequired()
+                .HasMaxLength(maxLength: 200);
+
             builder.HasIndex(o => o.CurrentRank)
                 .IsUnique();
 
