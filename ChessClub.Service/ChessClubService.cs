@@ -24,6 +24,7 @@ namespace ChessClub.Service
         public IEnumerable<Member> GetMembers(int pageNumber = 1, int pageSize = 20)
         {
             return _chessClubContext.Members
+                .OrderBy(m => m.CurrentRank)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();

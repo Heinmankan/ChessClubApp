@@ -1,3 +1,7 @@
+using ChessClub.Database.Helpers;
+using ChessClub.Service;
+using Serilog;
+
 namespace ChessClub.API
 {
     public class Program
@@ -6,9 +10,20 @@ namespace ChessClub.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var logger = new LoggerConfiguration()
+              .ReadFrom.Configuration(builder.Configuration)
+              .Enrich.FromLogContext()
+              .CreateLogger();
+
+            builder.Logging.ClearProviders();
+            builder.Logging.AddSerilog(logger);
+
             // Add services to the container.
+            builder.Services.RegisterDataService(builder.Configuration);
+            builder.Services.AddTransient<IChessClubService, ChessClubService>();
 
             builder.Services.AddControllers();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -25,7 +40,6 @@ namespace ChessClub.API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
