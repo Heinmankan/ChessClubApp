@@ -23,22 +23,22 @@ namespace ChessClub.Service
 
         public Guid AddMember(string name, string surname, string email, DateTime birthday)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (!Validations.IsValidName(name))
             {
                 throw new ArgumentOutOfRangeException(nameof(name), "Invalid input:");
             }
 
-            if (string.IsNullOrWhiteSpace(surname))
+            if (!Validations.IsValidSurname(surname))
             {
                 throw new ArgumentOutOfRangeException(nameof(surname), "Invalid input:");
             }
 
-            if (!EmailHelper.IsValidEmail(email))
+            if (!Validations.IsValidEmailAddress(email))
             {
                 throw new ArgumentOutOfRangeException(nameof(email), "Invalid input:");
             }
 
-            if (birthday > DateTime.Now.AddYears(-1))
+            if (!Validations.IsValidBirthday(birthday))
             {
                 throw new ArgumentOutOfRangeException(nameof(birthday), "Members should be at least 1 year old.");
             }
@@ -56,6 +56,81 @@ namespace ChessClub.Service
             _chessClubContext.SaveChanges();
 
             return newMember.Id;
+        }
+
+        public bool UpdateMember(Guid Id, string name = "", string surname = "", string email = "", DateTime birthday = default)
+        {
+            var hasChanges = false;
+            var memberToUpdate = _chessClubContext.Members.First(m => m.Id == Id);
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                if (!Validations.IsValidName(name))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(name), "Invalid input:");
+                }
+
+                memberToUpdate.Name = name;
+                hasChanges = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(surname))
+            {
+                if (!Validations.IsValidSurname(surname))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(surname), "Invalid input:");
+                }
+
+                memberToUpdate.Surname = surname;
+                hasChanges = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                if (!Validations.IsValidEmailAddress(email))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(email), "Invalid input:");
+                }
+
+                memberToUpdate.Email = email;
+                hasChanges = true;
+            }
+
+            if (birthday != default)
+            {
+                if (!Validations.IsValidBirthday(birthday))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(birthday), "Members should be at least 1 year old.");
+                }
+
+                memberToUpdate.Birthday = birthday;
+                hasChanges = true;
+            }
+
+            if (hasChanges)
+            {
+                return _chessClubContext.SaveChanges() == 1;
+            }
+
+            return true; // This could also be an error if nothing was given to update. Decided to just return, no harm done.
+        }
+
+        public bool DeleteMember(Guid id)
+        {
+            var memberToDelete = _chessClubContext.Members.First(m => m.Id == id);
+
+            _chessClubContext.Members.Remove(memberToDelete);
+
+            var membersToUpdate = _chessClubContext.Members.Where(m => m.CurrentRank >= memberToDelete.CurrentRank).ToList();
+
+            foreach (var member in membersToUpdate)
+            {
+                member.CurrentRank -= 1;
+            }
+
+            _chessClubContext.SaveChanges();
+
+            return true;
         }
     }
 }
