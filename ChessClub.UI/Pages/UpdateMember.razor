@@ -1,0 +1,75 @@
+﻿@page "/updatemember/{id:guid}"
+@using ChessClub.API.Models
+@using ChessClub.UI.Client
+
+<h1>Create member</h1>
+
+<EditForm Model="_memberToUpdate" OnValidSubmit="Update">
+	<div class="form-group mb-3">
+		<label for="Name">Name</label>
+		<InputText @bind-Value="_memberToUpdate.Name" class="form-control" id="postName"></InputText>
+
+		<label for="Surname">Surname</label>
+		<InputText @bind-Value="_memberToUpdate.Surname" class="form-control" id="postSurname"></InputText>
+		
+		<label for="Email">Email</label>
+		<InputText @bind-Value="_memberToUpdate.Email" class="form-control" id="postEmail"></InputText>
+		
+		<label for="Birthday">Birthday</label>
+		<InputDate @bind-Value="_memberToUpdate.Birthday" class="form-control" id="postBirthday"></InputDate>
+
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+		<button class="btn btn-success m-3" type="submit">Save</button>
+		<button class="btn btn-secondary" @onclick="NavigateHome">Cancel</button>
+	</div>
+</EditForm>
+
+@code {
+	[Inject] ChessClubClient _chessClubClient { get; set; }
+	[Inject] NavigationManager navigationManager { get; set; }
+	[Parameter] public Guid id { get; set; }
+
+	private UpdateMemberRequest _memberToUpdate = null;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		var member = await _chessClubClient.GetMemberByIdAsync(id);
+
+		if (member is not null)
+		{
+			_memberToUpdate = new UpdateMemberRequest
+			{
+				Id = member.Id,
+				Name = member.Name,
+				Surname = member.Surname,
+				Email = member.Email,
+				Birthday = member.Birthday
+			};
+		}		
+	}
+
+	private async Task Update()
+	{
+		// TODO: Add some validation on _memberToUpdate.
+
+		try
+		{
+			var result = await _chessClubClient.UpdateMemberAsync(_memberToUpdate);
+		}
+		catch (Exception ex)
+		{
+			// TODO: Add logging
+
+			return;
+		}
+
+		NavigateHome();
+	}
+
+	private void NavigateHome()
+	{
+		navigationManager.NavigateTo("/");
+	}
+}

@@ -8,12 +8,34 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\ChessClub.API\Models\AddMemberRequest.cs" Link="Client\Models\AddMemberRequest.cs" />
+    <Compile Include="..\ChessClub.API\Models\AddMemberResponse.cs" Link="Client\Models\AddMemberResponse.cs" />
+    <Compile Include="..\ChessClub.API\Models\DeleteMemberRequest.cs" Link="Client\Models\DeleteMemberRequest.cs" />
+    <Compile Include="..\ChessClub.API\Models\GetMembersResponse.cs" Link="Client\Models\GetMembersResponse.cs" />
+    <Compile Include="..\ChessClub.API\Models\MemberDTO.cs" Link="Client\Models\MemberDTO.cs" />
+    <Compile Include="..\ChessClub.API\Models\UpdateMemberRequest.cs" Link="Client\Models\UpdateMemberRequest.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.6" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Client\Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

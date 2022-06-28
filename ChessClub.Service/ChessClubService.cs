@@ -21,13 +21,18 @@ namespace ChessClub.Service
             _chessClubContext = chessClubContext ?? throw new ArgumentNullException(nameof(chessClubContext));
         }
 
-        public IEnumerable<Member> GetMembers(int pageNumber = 1, int pageSize = 20)
+        public IEnumerable<Member> GetMembers(int pageNumber = 1, int pageSize = int.MaxValue)
         {
             return _chessClubContext.Members
                 .OrderBy(m => m.CurrentRank)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
+        }
+
+        public Member GetMemberById(Guid id)
+        {
+            return _chessClubContext.Members.First(m => m.Id == id);
         }
 
         public Guid AddMember(string name, string surname, string email, DateTime birthday)

@@ -1,9 +1,127 @@
 ﻿@page "/"
+@using ChessClub.API.Models
+@using ChessClub.UI.Client
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Members</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Members</h1>
 
-Welcome to your new app.
+<button class="btn btn-outline-primary m-3" @onclick="Refresh">Refresh</button>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<a href="/addmember" class="btn btn-success">Add member</a>
+
+@if(_members.Any())
+{
+	// TODO: Add paging
+
+	<table class="table table-responsive table-striped">
+		<thead>
+			<tr>
+				<th scope="col"><a class="link-primary" @onclick="SortByName">Name</a></th>
+				<th scope="col"><a class="link-primary" @onclick="SortBySurname">Surname</a></th>
+				<th scope="col">Email</th>
+				<th scope="col">Birthday</th>
+				<th scope="col"><a class="link-primary" @onclick="SortByCurrentRank">Current Rank</a></th>
+				<th scope="col"><a class="link-primary" @onclick="SortByGamesPlayed">Games Played</a></th>
+				<th scope="col">CRUD</th>
+			</tr>
+		</thead>
+		<tbody>
+			@if (_members is not null)
+			{
+				foreach (var member in _members)
+				{
+					<tr>
+						<td>@member.Name</td>
+						<td>@member.Surname</td>
+						<td>@member.Email</td>
+						<td>@member.Birthday.ToString("dd MMMM yyyy")</td>
+						<td>@member.CurrentRank</td>
+						<td>@member.GamesPlayed</td>
+						<td>
+							<a href="/updatemember/@member.Id" class="btn btn-warning">Update</a>
+							<button class="btn btn-danger" @onclick="() => DeleteMember(member)">Delete</button>
+						</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+}
+else
+{
+	@if (_loading)
+	{
+		<div class="alert alert-primary m-5" role="alert">
+			Loading...
+		</div>
+	}
+	else
+	{
+		<div class="alert alert-primary m-5" role="alert">
+			There are currently no members.
+		</div>
+	}
+}
+
+
+@code
+{
+	[Inject] ChessClubClient _chessClubClient { get; set; }
+	private List<MemberDTO> _members = new List<MemberDTO>();
+	private bool _loading = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await Refresh();
+	}
+
+	private async Task DeleteMember(MemberDTO member)
+	{
+		var deleteResponse = await _chessClubClient.DeleteMemberAsync(new DeleteMemberRequest { Id = member.Id });
+
+		if (deleteResponse.HasValue && deleteResponse.Value == true)
+		{
+			_members.Remove(member);
+			StateHasChanged();
+		}
+	}
+
+	private async Task Refresh()
+	{
+		_loading = true;
+
+		_members = new List<MemberDTO>();
+
+		var memberResponse = await _chessClubClient.GetMembersAsync();
+		_members = memberResponse?.Members.OrderBy(m => m.CurrentRank).ToList() ?? new List<MemberDTO>();
+
+		StateHasChanged();
+		
+		_loading = false;
+	}
+
+	private void SortByName()
+	{
+		_members = _members.OrderBy(m => m.Name).ThenBy(m => m.Surname).ToList();
+		StateHasChanged();
+	}
+
+	private void SortBySurname()
+	{
+		_members = _members.OrderBy(m => m.Surname).ThenBy(m => m.Name).ToList();
+		StateHasChanged();
+	}
+
+	private void SortByCurrentRank()
+	{
+		_members = _members.OrderBy(m => m.CurrentRank).ThenBy(m => m.Name).ThenBy(m => m.Surname).ToList();
+		StateHasChanged();
+	}
+
+	private void SortByGamesPlayed()
+	{
+		_members = _members.OrderBy(m => m.GamesPlayed).ThenBy(m => m.Name).ThenBy(m => m.Surname).ToList();
+		StateHasChanged();
+	}
+}

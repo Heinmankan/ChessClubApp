@@ -20,36 +20,68 @@ namespace ChessClub.API.Controllers
             _chessClubService = chessClubService ?? throw new ArgumentNullException(nameof(chessClubService));
         }
 
-        [HttpPost("Members")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetMemberResponse))]
+        [HttpGet("Members")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetMembersResponse))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetMembers(GetMemberRequest request)
+        public async Task<IActionResult> GetMembers([FromQuery]int pageNumber, [FromQuery]int pageSize)
         {
             try
             {
                 IEnumerable<Member> result;
 
-                if (request.PageNumber > 0 && request.PageSize > 0)
+                if (pageNumber > 0 && pageSize > 0)
                 {
-                    result = await Task.Run(() => _chessClubService.GetMembers(request.PageNumber, request.PageSize));
+                    result = await Task.Run(() => _chessClubService.GetMembers(pageNumber, pageSize));
                 }
                 else
                 {
                     result = await Task.Run(() => _chessClubService.GetMembers());
                 }
 
-                return Ok(new GetMemberResponse
+                var memberList = result.Select(m => new MemberDTO
                 {
-                    Members = result.Select(m => new MemberDTO
-                    {
-                        Id = m.Id,
-                        Name = m.Name,
-                        Surname = m.Surname,
-                        Email = m.Email,
-                        Birthday = m.Birthday,
-                        GamesPlayed = m.GamesPlayed,
-                        CurrentRank = m.CurrentRank
-                    })
+                    Id = m.Id,
+                    Name = m.Name,
+                    Surname = m.Surname,
+                    Email = m.Email,
+                    Birthday = m.Birthday,
+                    GamesPlayed = m.GamesPlayed,
+                    CurrentRank = m.CurrentRank
+                });
+
+                return Ok(new GetMembersResponse
+                {
+                    Members = memberList
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected exception: {type} - {message}", ex.GetType(), ex.Message);
+
+                throw;
+            }
+        }
+
+        [HttpGet("Members/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MemberDTO))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetMemberById(Guid id)
+        {
+            try
+            {
+                Member result;
+
+                result = await Task.Run(() => _chessClubService.GetMemberById(id));
+
+                return Ok(new MemberDTO
+                {
+                    Id = result.Id,
+                    Name = result.Name,
+                    Surname = result.Surname,
+                    Email = result.Email,
+                    Birthday = result.Birthday,
+                    GamesPlayed = result.GamesPlayed,
+                    CurrentRank = result.CurrentRank
                 });
             }
             catch (Exception ex)

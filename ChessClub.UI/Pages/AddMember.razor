@@ -1,0 +1,60 @@
+﻿@page "/addmember"
+@using ChessClub.API.Models
+@using ChessClub.UI.Client
+
+<h1>Create member</h1>
+
+<EditForm Model="_memberToCreate" OnValidSubmit="CreateMember">
+	<div class="form-group mb-3">
+		<label for="Name">Name</label>
+		<InputText @bind-Value="_memberToCreate.Name" class="form-control" id="postName"></InputText>
+
+		<label for="Surname">Surname</label>
+		<InputText @bind-Value="_memberToCreate.Surname" class="form-control" id="postSurname"></InputText>
+		
+		<label for="Email">Email</label>
+		<InputText @bind-Value="_memberToCreate.Email" class="form-control" id="postEmail"></InputText>
+		
+		<label for="Birthday">Birthday</label>
+		<InputDate @bind-Value="_memberToCreate.Birthday" class="form-control" id="postBirthday"></InputDate>
+
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+		<button class="btn btn-success m-3" type="submit">Save</button>
+		<button class="btn btn-secondary" @onclick="NavigateHome">Cancel</button>
+	</div>
+</EditForm>
+
+@code {
+	[Inject] ChessClubClient _chessClubClient { get; set; }
+	[Inject] NavigationManager navigationManager { get; set; }
+
+	private AddMemberRequest _memberToCreate = new AddMemberRequest
+	{
+		Birthday = DateTime.Now
+	};
+
+	private async Task CreateMember()
+	{
+		// TODO: Add some validation on _memberToCreate.
+
+		try
+		{
+			var result = await _chessClubClient.AddMemberAsync(_memberToCreate);
+		}
+		catch (Exception ex)
+		{
+			// TODO: Add logging
+
+			return;
+		}
+
+		NavigateHome();
+	}
+
+	private void NavigateHome()
+	{
+		navigationManager.NavigateTo("/");
+	}
+}
