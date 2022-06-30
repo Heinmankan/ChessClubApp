@@ -37,6 +37,9 @@ namespace ChessClub.UI.Client
         public async Task<bool?> DeleteMemberAsync(DeleteMemberRequest request) =>
             await PostAsync<bool?, DeleteMemberRequest>(request, _options.DeleteMemberUri);
 
+        public async Task<AddResultResponse?> AddResultAsync(AddResultRequest request) =>
+            await PostAsync<AddResultResponse, AddResultRequest>(request, _options.AddResultUri);
+
         private async Task<TResponse?> PostAsync<TResponse, TRequest>(TRequest request, string uri)
         {
             try

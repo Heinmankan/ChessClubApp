@@ -151,5 +151,27 @@ namespace ChessClub.API.Controllers
                 throw;
             }
         }
+
+        [HttpPost("AddResult")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AddResultResponse))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddResult(AddResultRequest request)
+        {
+            try
+            {
+                var result = await Task.Run(() => _chessClubService.AddResult(request.Player1, request.Player2, request.Winner));
+
+                return Ok(new AddResultResponse
+                {
+                    IsSuccess = result
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected exception: {type} - {message}", ex.GetType(), ex.Message);
+
+                throw;
+            }
+        }
     }
 }

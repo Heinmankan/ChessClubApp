@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ChessClub.Database.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -26,12 +26,6 @@ namespace ChessClub.Database.Migrations
                 {
                     table.PrimaryKey("PK_Members", x => x.Id);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Members_CurrentRank",
-                table: "Members",
-                column: "CurrentRank",
-                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

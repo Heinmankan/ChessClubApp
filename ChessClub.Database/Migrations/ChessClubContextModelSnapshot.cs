@@ -60,9 +60,6 @@ namespace ChessClub.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrentRank")
-                        .IsUnique();
-
                     b.ToTable("Members");
                 });
 #pragma warning restore 612, 618

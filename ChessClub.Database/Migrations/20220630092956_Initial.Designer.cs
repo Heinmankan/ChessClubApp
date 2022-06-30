@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChessClub.Database.Migrations
 {
     [DbContext(typeof(ChessClubContext))]
-    [Migration("20220623161821_Initial-Migration")]
-    partial class InitialMigration
+    [Migration("20220630092956_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -61,9 +61,6 @@ namespace ChessClub.Database.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CurrentRank")
-                        .IsUnique();
 
                     b.ToTable("Members");
                 });

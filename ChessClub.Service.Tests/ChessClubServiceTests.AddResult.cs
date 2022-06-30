@@ -1,6 +1,7 @@
 ﻿using ChessClub.Database;
 using ChessClub.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 
@@ -56,8 +57,10 @@ namespace ChessClub.Service.Tests
         [TestCase("80000000-0000-0000-0000-000000000008", "90000000-0000-0000-0000-000000000009", null, 8, 9)]
         public async Task TestAddResult(Guid player1Id, Guid player2Id, Guid? winnerId, int player1NewRanking, int player2NewRanking)
         {
-            var builder = new DbContextOptionsBuilder<ChessClubContext>().UseInMemoryDatabase(Guid.NewGuid().ToString());
-            var context = new ChessClubContext(builder.Options);
+            var builder = new DbContextOptionsBuilder<ChessClubContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            var context = new ChessClubContext(builder.Options, new NullLoggerFactory());
             var members = Enumerable.Range(1, 9)
                     .Select(i => new Member
                     {

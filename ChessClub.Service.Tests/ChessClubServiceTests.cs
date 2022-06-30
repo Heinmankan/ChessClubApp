@@ -2,6 +2,7 @@
 using ChessClub.Database;
 using ChessClub.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 
@@ -18,7 +19,7 @@ namespace ChessClub.Service.Tests
         public void GlobalPrepare()
         {
             var builder = new DbContextOptionsBuilder<ChessClubContext>().UseInMemoryDatabase(Guid.NewGuid().ToString());
-            _chessClubContext = new ChessClubContext(builder.Options);
+            _chessClubContext = new ChessClubContext(builder.Options, new NullLoggerFactory());
             _chessClubService = new ChessClubService(NullLogger<ChessClubService>.Instance, _chessClubContext);
 
             SeedDatabase();

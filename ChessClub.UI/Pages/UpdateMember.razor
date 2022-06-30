@@ -2,7 +2,9 @@
 @using ChessClub.API.Models
 @using ChessClub.UI.Client
 
-<h1>Create member</h1>
+<PageTitle>Chess Club - @_pageTitle</PageTitle>
+
+<h1>@_pageTitle</h1>
 
 <EditForm Model="_memberToUpdate" OnValidSubmit="Update">
 	<div class="form-group mb-3">
@@ -22,7 +24,7 @@
 		<ValidationSummary />
 
 		<button class="btn btn-success m-3" type="submit">Save</button>
-		<button class="btn btn-secondary" @onclick="NavigateHome">Cancel</button>
+		<button class="btn btn-secondary" @onclick="navigateBack">Cancel</button>
 	</div>
 </EditForm>
 
@@ -30,8 +32,9 @@
 	[Inject] ChessClubClient _chessClubClient { get; set; }
 	[Inject] NavigationManager navigationManager { get; set; }
 	[Parameter] public Guid id { get; set; }
+	private string _pageTitle = "Update member";
 
-	private UpdateMemberRequest _memberToUpdate = null;
+	private UpdateMemberRequest _memberToUpdate = new UpdateMemberRequest();
 
 	protected override async Task OnParametersSetAsync()
 	{
@@ -65,11 +68,11 @@
 			return;
 		}
 
-		NavigateHome();
+		navigateBack();
 	}
 
-	private void NavigateHome()
+	private void navigateBack()
 	{
-		navigationManager.NavigateTo("/");
+		navigationManager.NavigateTo("/members");
 	}
 }

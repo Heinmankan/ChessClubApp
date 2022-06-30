@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ChessClub.Database
 {
@@ -21,7 +22,7 @@ namespace ChessClub.Database
 
             optionsBuilder.UseSqlServer(connectionString);
 
-            return new ChessClubContext(optionsBuilder.Options);
+            return new ChessClubContext(optionsBuilder.Options, new NullLoggerFactory());
         }
     }
 }

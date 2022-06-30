@@ -12,7 +12,7 @@ namespace ChessClub.Service.Tests
         public void TestAddFirstMember()
         {
             var builder = new DbContextOptionsBuilder<ChessClubContext>().UseInMemoryDatabase(Guid.NewGuid().ToString());
-            var chessClubContext = new ChessClubContext(builder.Options);
+            var chessClubContext = new ChessClubContext(builder.Options, new NullLoggerFactory());
             var chessClubService = new ChessClubService(NullLogger<ChessClubService>.Instance, chessClubContext);
 
             var testMember = MemberFaker.Generate(1).First();

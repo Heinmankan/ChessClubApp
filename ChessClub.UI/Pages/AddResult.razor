@@ -1,0 +1,125 @@
+﻿@page "/addresult"
+@using ChessClub.API.Models
+@using ChessClub.UI.Client
+
+<PageTitle>Chess Club - @_pageTitle</PageTitle>
+
+<h1>@_pageTitle</h1>
+
+<EditForm Model="_addResult" OnValidSubmit="AddGameResult">
+	<div class="form-group mb-3">
+		@if (_draw)
+		{
+			<label>Player 1</label>
+		}
+		else
+		{
+			<label>Winner</label>
+		}	
+		<select @bind="_addResult.Player1" class="form-select m-3">
+			@if (_members != null)
+			{
+				<option selected>Please select a player</option>
+				@foreach (var member in _members)
+				{
+					<option value="@member.Id">@($"{member.Name} [{member.Id}]")</option>
+				}
+			}
+		</select>
+
+		@if (_draw)
+		{
+			<label>Player 2</label>
+		}
+		else
+		{
+			<label>Opponent</label>
+		}
+		<select @bind="_addResult.Player2" class="form-select m-3">
+			@if (_members != null)
+			{
+				<option selected>Please select a player</option>
+				@foreach (var member in _members)
+				{
+					<option value="@member.Id">@($"{member.Name} [{member.Id}]")</option>
+				}
+			}
+		</select>
+
+		<div class="form-check">
+		  <input class="form-check-input" type="checkbox" @bind="_draw" id="flexCheckDefault">
+		  <label class="form-check-label" for="flexCheckDefault">
+			Draw
+		  </label>
+		</div>
+
+		<button class="btn btn-success m-3" type="submit">Save</button>
+		<button class="btn btn-secondary" @onclick="navigateHome">Back</button>
+	</div>
+</EditForm>
+
+@code {
+	[Inject] ChessClubClient _chessClubClient { get; set; }
+	[Inject] NavigationManager navigationManager { get; set; }
+	private string _pageTitle = "Add result";
+
+	private List<MemberDTO> _members = new List<MemberDTO>();
+	private bool _loading = false;
+	private AddResultRequest _addResult = new AddResultRequest();
+	private Guid? _winner = null;
+	private Guid? _opponent = null;
+	private bool _draw = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await Refresh();
+	}
+
+	private async Task Refresh()
+	{
+		_loading = true;
+
+		_members = new List<MemberDTO>();
+
+		var memberResponse = await _chessClubClient.GetMembersAsync();
+		_members = memberResponse?.Members.OrderBy(m => m.CurrentRank).ToList() ?? new List<MemberDTO>();
+
+		StateHasChanged();
+
+		_loading = false;
+	}
+
+	private void oninput()
+	{
+		if (_draw)
+		{
+			_addResult.Winner = null;
+		}
+		else
+		{
+			_addResult.Winner = _addResult.Player1;
+		}
+	}
+
+	private void navigateHome()
+	{
+		navigationManager.NavigateTo("/");
+	}
+
+	private async Task AddGameResult()
+	{
+		try
+		{
+			_addResult.Winner = _draw ? null : _addResult.Player1;
+			var result = await _chessClubClient.AddResultAsync(_addResult);
+
+			navigateHome();
+		}
+		catch (Exception ex)
+		{
+			// TODO: Add logging
+
+			return;
+		}
+	}
+}

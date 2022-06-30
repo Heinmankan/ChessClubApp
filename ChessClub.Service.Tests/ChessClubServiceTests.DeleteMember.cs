@@ -18,7 +18,7 @@ namespace ChessClub.Service.Tests
         public void TestDeleteFirstMember()
         {
             var builder = new DbContextOptionsBuilder<ChessClubContext>().UseInMemoryDatabase(Guid.NewGuid().ToString());
-            var chessClubContext = new ChessClubContext(builder.Options);
+            var chessClubContext = new ChessClubContext(builder.Options, new NullLoggerFactory());
             var chessClubService = new ChessClubService(NullLogger<ChessClubService>.Instance, chessClubContext);
 
             int i = 1;
@@ -64,7 +64,7 @@ namespace ChessClub.Service.Tests
         public void TestDeleteMiddleMember()
         {
             var builder = new DbContextOptionsBuilder<ChessClubContext>().UseInMemoryDatabase(Guid.NewGuid().ToString());
-            var chessClubContext = new ChessClubContext(builder.Options);
+            var chessClubContext = new ChessClubContext(builder.Options, new NullLoggerFactory());
             var chessClubService = new ChessClubService(NullLogger<ChessClubService>.Instance, chessClubContext);
 
             int i = 1;
@@ -108,7 +108,7 @@ namespace ChessClub.Service.Tests
         public void TestDeleteLastMember()
         {
             var builder = new DbContextOptionsBuilder<ChessClubContext>().UseInMemoryDatabase(Guid.NewGuid().ToString());
-            var chessClubContext = new ChessClubContext(builder.Options);
+            var chessClubContext = new ChessClubContext(builder.Options, new NullLoggerFactory());
             var chessClubService = new ChessClubService(NullLogger<ChessClubService>.Instance, chessClubContext);
 
             int i = 1;
@@ -152,7 +152,7 @@ namespace ChessClub.Service.Tests
         public void TestDeleteMemberWithInvalidId()
         {
             var builder = new DbContextOptionsBuilder<ChessClubContext>().UseInMemoryDatabase(Guid.NewGuid().ToString());
-            var chessClubContext = new ChessClubContext(builder.Options);
+            var chessClubContext = new ChessClubContext(builder.Options, new NullLoggerFactory());
             var chessClubService = new ChessClubService(NullLogger<ChessClubService>.Instance, chessClubContext);
 
             int i = 1;

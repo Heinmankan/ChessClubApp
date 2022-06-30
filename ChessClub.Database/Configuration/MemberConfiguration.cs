@@ -25,8 +25,8 @@ namespace ChessClub.Database.Configuration
                 .IsRequired()
                 .HasMaxLength(maxLength: 200);
 
-            builder.HasIndex(o => o.CurrentRank)
-                .IsUnique();
+            //builder.HasIndex(o => o.CurrentRank)
+            //    .IsUnique();
 
             builder.Property(a => a.RowVersion)
                 .IsRowVersion();

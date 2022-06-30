@@ -16,6 +16,8 @@
 
         public string DeleteMemberUri { get; set; } = string.Empty;
 
+        public string AddResultUri { get; set; } = string.Empty;
+
         public int TimeoutInSeconds { get; set; } = 30;
     }
 }

@@ -156,16 +156,16 @@ namespace ChessClub.Service
                 return false;
             }
 
-            var members = _chessClubContext.Members.Where(m => m.Id == player1 || m.Id == player2).OrderBy(m => m.CurrentRank).ToList();
+            var checkMembers = _chessClubContext.Members.Where(m => m.Id == player1 || m.Id == player2).OrderBy(m => m.CurrentRank).ToList();
 
-            if (members.Count != 2)
+            if (checkMembers.Count != 2)
             {
                 // Could not find a member... (specify which one)
-                if (!members.Any(m => m.Id == player1))
+                if (!checkMembers.Any(m => m.Id == player1))
                 {
                     _logger.LogError("Unable to find member: {memberId}", player1);
                 }
-                else if (!members.Any(m => m.Id == player2))
+                else if (!checkMembers.Any(m => m.Id == player2))
                 {
                     _logger.LogError("Unable to find member: {memberId}", player2);
                 }
@@ -173,100 +173,135 @@ namespace ChessClub.Service
                 return false;
             }
 
-            if (winner is null)
+            var lowerRank = Math.Min(checkMembers.First().CurrentRank, checkMembers.Last().CurrentRank);
+            var higherRank = Math.Max(checkMembers.First().CurrentRank, checkMembers.Last().CurrentRank);
+
+            using var transaction = _chessClubContext.Database.BeginTransaction();
+            try
             {
-                // If it’s a draw, the lower-ranked player can gain one position, unless the two players are
-                // adjacent. So if the players are ranked 10th and 11th, and it’s a draw, no change in
-                // ranking takes place. But if the players are ranked 10th and 15th, and it’s a draw, the
-                // player with rank 15 will move up to rank 14 and the player with rank 10 will stay the
-                // same
-
-                var higherPositionMember = members.First();
-                var lowerPositionMember = members.Last();
-
-                if (lowerPositionMember.CurrentRank - higherPositionMember.CurrentRank > 1)
-                {
-                    // Move lowerPositionMember Position up by 1
-                    var swapMember = _chessClubContext.Members.First(m => m.CurrentRank == lowerPositionMember.CurrentRank - 1);
-                    swapMember.CurrentRank += 1;
-                    lowerPositionMember.CurrentRank -= 1;
-
-                    _chessClubContext.Members.UpdateRange(new List<Member>() { swapMember, lowerPositionMember });
-                    var count = await _chessClubContext.SaveChangesAsync();
-
-                    if (count != 2)
-                    {
-                        _logger.LogError("Error saving draw result: {count}", count);
-
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            var winningMember = members.First(m => m.Id == winner);
-            var winningPosition = winningMember.CurrentRank;
-
-            var losingMember = members.First(m => m.Id != winner);
-            var losingPosition = losingMember.CurrentRank;
-
-            double positionDifference = (double)(winningPosition - losingPosition);
-
-            // If the lower-ranked player beats a higher-ranked player, the higher-ranked player will
-            // move one rank down, and the lower level player will move up by half the difference
-            // between their original ranks.
-            // For example, if players ranked 10th and 16th play and the lower-ranked player wins, the
-            // first player will move to rank 11th and the other player will move to rank (16 - 10) / 2 = 3
-            // placed up, to rank 13th
-
-            if (positionDifference > 0) // Winning member has lower ranking than winning member
-            {
-                var lowerPosition = Math.Min(winningPosition, losingPosition);
-                var higherPosition = Math.Max(winningPosition, losingPosition);
-
-                var affectedMembers = _chessClubContext.Members
-                    .Where(m => m.CurrentRank >= lowerPosition && m.CurrentRank <= higherPosition)
+                var members = _chessClubContext.Members
+                    .Where(m => m.CurrentRank >= lowerRank && m.CurrentRank <= higherRank)
                     .ToList();
 
-                // Move losing member down 1 position:
-                // If the lower-ranked player beats a higher-ranked player, the higher-ranked player will move one rank down
-                var memberToMoveDown = affectedMembers.First(m => m.CurrentRank == losingPosition);
-                var memberToMoveUp = affectedMembers.First(m => m.CurrentRank == losingPosition + 1);
+                var member1 = members.First(m => m.Id == player1);
+                member1.GamesPlayed += 1;
+                var member2 = members.First(m => m.Id == player2);
+                member2.GamesPlayed += 1;
 
-                memberToMoveDown.CurrentRank += 1;
-                memberToMoveUp.CurrentRank -= 1;
+                var count = await _chessClubContext.SaveChangesAsync();
 
-                // Move the winning member up:
-                // ..., and the lower level player will move up by half the difference between their original ranks.
-                if (positionDifference > 1) // Move the winning member up 
+                if (count != 2)
                 {
-                    var winnerMoveUpPositions = (int)Math.Round(positionDifference / 2, 0, MidpointRounding.AwayFromZero);
+                    _logger.LogError("Error saving draw result: {count}", count);
+                    await transaction.RollbackAsync();
+                    return false;
+                }
 
-                    var winnerNewPosition = winningPosition - winnerMoveUpPositions;
+                if (winner is null)
+                {
+                    // If it’s a draw, the lower-ranked player can gain one position, unless the two players are
+                    // adjacent. So if the players are ranked 10th and 11th, and it’s a draw, no change in
+                    // ranking takes place. But if the players are ranked 10th and 15th, and it’s a draw, the
+                    // player with rank 15 will move up to rank 14 and the player with rank 10 will stay the
+                    // same
 
-                    var membersToMoveUp = affectedMembers.Where(m => m.CurrentRank >= winnerNewPosition && m.CurrentRank < winningPosition).ToList();
-                    var membersToUpdate = membersToMoveUp.Count;
+                    var higherPositionMember = (member1.CurrentRank < member2.CurrentRank) ? member1 : member2;
+                    var lowerPositionMember = (member1.CurrentRank < member2.CurrentRank) ? member2 : member1;
 
-                    winningMember.CurrentRank = winnerNewPosition;
-
-                    membersToMoveUp.ForEach(m => m.CurrentRank++);
-
-                    _chessClubContext.Members.UpdateRange(new List<Member>(membersToMoveUp));
-                    _chessClubContext.Members.Update(winningMember);
-
-                    var count = await _chessClubContext.SaveChangesAsync();
-
-                    if (count != membersToUpdate + 1)
+                    if (lowerPositionMember.CurrentRank - higherPositionMember.CurrentRank > 1)
                     {
-                        _logger.LogError("Error saving draw result: {count}", count);
+                        // Move lowerPositionMember Position up by 1
+                        var swapMember = members.First(m => m.CurrentRank == lowerPositionMember.CurrentRank - 1);
+                        swapMember.CurrentRank += 1;
+                        lowerPositionMember.CurrentRank -= 1;
 
-                        return false;
+                        //_chessClubContext.Members.UpdateRange(new List<Member>() { swapMember, lowerPositionMember });
+                        count = await _chessClubContext.SaveChangesAsync();
+
+                        if (count != 2)
+                        {
+                            _logger.LogError("Error saving draw result: {count}", count);
+                            await transaction.RollbackAsync();
+                            return false;
+                        }
                     }
                 }
-            }
+                else
+                {
+                    var winningMember = members.First(m => m.Id == winner);
+                    var winningPosition = winningMember.CurrentRank;
 
-            return true;
+                    var losingMember = members.First(m => m.Id != winner);
+                    var losingPosition = losingMember.CurrentRank;
+
+                    double positionDifference = (double)(winningPosition - losingPosition);
+
+                    // If the lower-ranked player beats a higher-ranked player, the higher-ranked player will
+                    // move one rank down, and the lower level player will move up by half the difference
+                    // between their original ranks.
+                    // For example, if players ranked 10th and 16th play and the lower-ranked player wins, the
+                    // first player will move to rank 11th and the other player will move to rank (16 - 10) / 2 = 3
+                    // placed up, to rank 13th
+
+                    if (positionDifference > 0) // Winning member has lower ranking than winning member
+                    {
+                        var lowerPosition = Math.Min(winningPosition, losingPosition);
+                        var higherPosition = Math.Max(winningPosition, losingPosition);
+
+                        // Move losing member down 1 position:
+                        // If the lower-ranked player beats a higher-ranked player, the higher-ranked player will move one rank down
+                        var memberToMoveDown = members.First(m => m.CurrentRank == losingPosition);
+                        var memberToMoveUp = members.First(m => m.CurrentRank == losingPosition + 1);
+
+                        memberToMoveDown.CurrentRank += 1;
+                        memberToMoveUp.CurrentRank -= 1;
+
+                        count = await _chessClubContext.SaveChangesAsync();
+
+                        if (count != 2)
+                        {
+                            _logger.LogError("Error saving draw result: {count}", count);
+                            await transaction.RollbackAsync();
+                            return false;
+                        }
+
+                        // Move the winning member up:
+                        // ..., and the lower level player will move up by half the difference between their original ranks.
+                        if (positionDifference > 1) // Move the winning member up 
+                        {
+                            var winnerMoveUpPositions = (int)Math.Round(positionDifference / 2, 0, MidpointRounding.AwayFromZero);
+
+                            var winnerNewPosition = winningPosition - winnerMoveUpPositions;
+
+                            var membersToMoveUp = members.Where(m => m.CurrentRank >= winnerNewPosition && m.CurrentRank < winningPosition).ToList();
+                            var membersToUpdate = membersToMoveUp.Count;
+
+                            winningMember.CurrentRank = winnerNewPosition;
+
+                            membersToMoveUp.ForEach(m => m.CurrentRank++);
+
+                            count = await _chessClubContext.SaveChangesAsync();
+
+                            if (count != membersToUpdate + 1)
+                            {
+                                _logger.LogError("Error saving draw result: {count}", count);
+                                await transaction.RollbackAsync();
+                                return false;
+                            }
+                        }
+                    }
+                }                
+
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception saving result: {error}", ex.Message);
+
+                await transaction.RollbackAsync();
+                return false;
+            }
         }
     }
 }

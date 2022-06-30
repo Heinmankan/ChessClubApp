@@ -10,6 +10,8 @@
   <ItemGroup>
     <Compile Include="..\ChessClub.API\Models\AddMemberRequest.cs" Link="Client\Models\AddMemberRequest.cs" />
     <Compile Include="..\ChessClub.API\Models\AddMemberResponse.cs" Link="Client\Models\AddMemberResponse.cs" />
+    <Compile Include="..\ChessClub.API\Models\AddResultRequest.cs" Link="Client\Models\AddResultRequest.cs" />
+    <Compile Include="..\ChessClub.API\Models\AddResultResponse.cs" Link="Client\Models\AddResultResponse.cs" />
     <Compile Include="..\ChessClub.API\Models\DeleteMemberRequest.cs" Link="Client\Models\DeleteMemberRequest.cs" />
     <Compile Include="..\ChessClub.API\Models\GetMembersResponse.cs" Link="Client\Models\GetMembersResponse.cs" />
     <Compile Include="..\ChessClub.API\Models\MemberDTO.cs" Link="Client\Models\MemberDTO.cs" />

@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/members"
 @using ChessClub.API.Models
 @using ChessClub.UI.Client
 
@@ -8,6 +8,8 @@
 
 <button class="btn btn-outline-primary m-3" @onclick="Refresh">Refresh</button>
 
+<a href="/addmember" class="btn btn-success">Add member</a>
+
 @if(_members.Any())
 {
 	// TODO: Add paging
@@ -15,10 +17,13 @@
 	<table class="table table-responsive table-striped">
 		<thead>
 			<tr>
-				<th scope="col"><a class="link-primary" @onclick="SortByCurrentRank">Current Rank</a></th>
 				<th scope="col"><a class="link-primary" @onclick="SortByName">Name</a></th>
 				<th scope="col"><a class="link-primary" @onclick="SortBySurname">Surname</a></th>
+				<th scope="col">Email</th>
+				<th scope="col">Birthday</th>
+				<th scope="col"><a class="link-primary" @onclick="SortByCurrentRank">Current Rank</a></th>
 				<th scope="col"><a class="link-primary" @onclick="SortByGamesPlayed">Games Played</a></th>
+				<th scope="col">CRUD</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -27,10 +32,16 @@
 				foreach (var member in _members)
 				{
 					<tr>
-						<td>@member.CurrentRank</td>
 						<td>@member.Name</td>
 						<td>@member.Surname</td>
+						<td>@member.Email</td>
+						<td>@member.Birthday.ToString("dd MMMM yyyy")</td>
+						<td>@member.CurrentRank</td>
 						<td>@member.GamesPlayed</td>
+						<td>
+							<a href="/updatemember/@member.Id" class="btn btn-warning">Update</a>
+							<button class="btn btn-danger" @onclick="() => DeleteMember(member)">Delete</button>
+						</td>
 					</tr>
 				}
 			}
@@ -53,13 +64,12 @@ else
 	}
 }
 
-
 @code
 {
 	[Inject] ChessClubClient _chessClubClient { get; set; }
 	private List<MemberDTO> _members = new List<MemberDTO>();
 	private bool _loading = false;
-	private string _pageTitle = "Leaderboard";
+	private string _pageTitle = "Member maintenance";
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -115,3 +125,4 @@ else
 		StateHasChanged();
 	}
 }
+

@@ -27,7 +27,6 @@ namespace ChessClub.UI
             using var stream = await response.Content.ReadAsStreamAsync();
             builder.Configuration.AddJsonStream(stream);
 
-
             builder.Services.AddHttpClient("ChessClubClient", (provider, client) =>
             {
                 var options = provider.GetRequiredService<IOptions<ChessClubClientOptions>>().Value;
