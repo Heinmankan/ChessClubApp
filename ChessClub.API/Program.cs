@@ -6,14 +6,28 @@ namespace ChessClub.API
 {
     public class Program
     {
+        private static IConfiguration? _configuration;
+
+        private static IConfiguration Configuration
+        {
+            get
+            {
+                _configuration ??= LoadConfiguration();
+                return _configuration;
+            }
+        }
+
+        private static string CurrentEnvironment =>
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Production;
+
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
-
             var logger = new LoggerConfiguration()
-              .ReadFrom.Configuration(builder.Configuration)
+              .ReadFrom.Configuration(Configuration)
               .Enrich.FromLogContext()
               .CreateLogger();
+
+            var builder = WebApplication.CreateBuilder(args);
 
             builder.Logging.ClearProviders();
             builder.Logging.AddSerilog(logger);
@@ -51,6 +65,20 @@ namespace ChessClub.API
                 );
 
             app.Run();
+        }
+
+        private static IConfiguration LoadConfiguration()
+        {
+            var builder = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", false)
+                .AddJsonFile($"appsettings.{CurrentEnvironment}.json", true);
+
+            if (CurrentEnvironment.Equals(Environments.Development, StringComparison.InvariantCultureIgnoreCase))
+            {
+                builder.AddUserSecrets<Program>();
+            }
+
+            return builder.Build();
         }
     }
 }
