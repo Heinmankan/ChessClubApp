@@ -1,4 +1,7 @@
 ﻿@page "/"
+
+@inject ILogger<Index> _logger;
+
 @using ChessClub.API.Models
 @using ChessClub.UI.Client
 
@@ -63,22 +66,15 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
+		_logger.LogInformation("Method: {method}", nameof(OnInitializedAsync));
+
 		await Refresh();
-	}
-
-	private async Task DeleteMember(MemberDTO member)
-	{
-		var deleteResponse = await _chessClubClient.DeleteMemberAsync(new DeleteMemberRequest { Id = member.Id });
-
-		if (deleteResponse.HasValue && deleteResponse.Value == true)
-		{
-			_members.Remove(member);
-			StateHasChanged();
-		}
 	}
 
 	private async Task Refresh()
 	{
+		_logger.LogInformation("Method: {method}", nameof(Refresh));
+
 		_loading = true;
 
 		_members = new List<MemberDTO>();
@@ -93,24 +89,32 @@ else
 
 	private void SortByName()
 	{
+		_logger.LogInformation("Method: {method}", nameof(SortByName));
+
 		_members = _members.OrderBy(m => m.Name).ThenBy(m => m.Surname).ToList();
 		StateHasChanged();
 	}
 
 	private void SortBySurname()
 	{
+		_logger.LogInformation("Method: {method}", nameof(SortBySurname));
+
 		_members = _members.OrderBy(m => m.Surname).ThenBy(m => m.Name).ToList();
 		StateHasChanged();
 	}
 
 	private void SortByCurrentRank()
 	{
+		_logger.LogInformation("Method: {method}", nameof(SortByCurrentRank));
+
 		_members = _members.OrderBy(m => m.CurrentRank).ThenBy(m => m.Name).ThenBy(m => m.Surname).ToList();
 		StateHasChanged();
 	}
 
 	private void SortByGamesPlayed()
 	{
+		_logger.LogInformation("Method: {method}", nameof(SortByGamesPlayed));
+
 		_members = _members.OrderBy(m => m.GamesPlayed).ThenBy(m => m.Name).ThenBy(m => m.Surname).ToList();
 		StateHasChanged();
 	}

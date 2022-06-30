@@ -1,4 +1,7 @@
 ﻿@page "/updatemember/{id:guid}"
+
+@inject ILogger<UpdateMember> _logger;
+
 @using ChessClub.API.Models
 @using ChessClub.UI.Client
 
@@ -38,6 +41,8 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
+		_logger.LogInformation("Method: {method}", nameof(OnParametersSetAsync));
+
 		var member = await _chessClubClient.GetMemberByIdAsync(id);
 
 		if (member is not null)
@@ -55,6 +60,8 @@
 
 	private async Task Update()
 	{
+		_logger.LogInformation("Method: {method}", nameof(Update));
+
 		// TODO: Add some validation on _memberToUpdate.
 
 		try
@@ -63,7 +70,7 @@
 		}
 		catch (Exception ex)
 		{
-			// TODO: Add logging
+			_logger.LogError(ex, "Method: {method} - Exception: {message}", nameof(Update), ex.Message);
 
 			return;
 		}
@@ -73,6 +80,8 @@
 
 	private void navigateBack()
 	{
+		_logger.LogInformation("Method: {method}", nameof(navigateBack));
+
 		navigationManager.NavigateTo("/members");
 	}
 }

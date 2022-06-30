@@ -9,8 +9,6 @@ namespace ChessClub.UI
     {
         public static async Task Main(string[] args)
         {
-            // TODO: Add Serilog
-
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");

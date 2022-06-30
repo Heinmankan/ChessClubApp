@@ -1,4 +1,7 @@
 ﻿@page "/addresult"
+
+@inject ILogger<AddResult> _logger;
+
 @using ChessClub.API.Models
 @using ChessClub.UI.Client
 
@@ -22,7 +25,7 @@
 				<option selected>Please select a player</option>
 				@foreach (var member in _members)
 				{
-					<option value="@member.Id">@($"{member.Name} [{member.Id}]")</option>
+					<option value="@member.Id">@($"{member.Name} {member.Surname} [{member.CurrentRank}]")</option>
 				}
 			}
 		</select>
@@ -41,7 +44,7 @@
 				<option selected>Please select a player</option>
 				@foreach (var member in _members)
 				{
-					<option value="@member.Id">@($"{member.Name} [{member.Id}]")</option>
+					<option value="@member.Id">@($"{member.Name} {member.Surname} [{member.CurrentRank}]")</option>
 				}
 			}
 		</select>
@@ -72,11 +75,15 @@
 
 	protected override async Task OnInitializedAsync()
 	{
+		_logger.LogInformation("Method: {method}", nameof(OnInitializedAsync));
+
 		await Refresh();
 	}
 
 	private async Task Refresh()
 	{
+		_logger.LogInformation("Method: {method}", nameof(Refresh));
+
 		_loading = true;
 
 		_members = new List<MemberDTO>();
@@ -89,27 +96,24 @@
 		_loading = false;
 	}
 
-	private void oninput()
-	{
-		if (_draw)
-		{
-			_addResult.Winner = null;
-		}
-		else
-		{
-			_addResult.Winner = _addResult.Player1;
-		}
-	}
-
 	private void navigateHome()
 	{
+		_logger.LogInformation("Method: {method}", nameof(navigateHome));
+
 		navigationManager.NavigateTo("/");
 	}
 
 	private async Task AddGameResult()
 	{
+		_logger.LogInformation("Method: {method}", nameof(AddGameResult));
+
 		try
 		{
+			if (_addResult.Player1 == _addResult.Player2)
+			{
+				return;	
+			}
+
 			_addResult.Winner = _draw ? null : _addResult.Player1;
 			var result = await _chessClubClient.AddResultAsync(_addResult);
 
@@ -117,7 +121,7 @@
 		}
 		catch (Exception ex)
 		{
-			// TODO: Add logging
+			_logger.LogError(ex, "Method: {method} - Exception: {message}", nameof(AddGameResult), ex.Message);
 
 			return;
 		}

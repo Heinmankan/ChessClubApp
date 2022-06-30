@@ -1,4 +1,7 @@
 ﻿@page "/addmember"
+
+@inject ILogger<AddMember> _logger;
+
 @using ChessClub.API.Models
 @using ChessClub.UI.Client
 
@@ -40,6 +43,8 @@
 
 	private async Task CreateMember()
 	{
+		_logger.LogInformation("Method: {method}", nameof(CreateMember));
+
 		// TODO: Add some validation on _memberToCreate.
 
 		try
@@ -48,7 +53,7 @@
 		}
 		catch (Exception ex)
 		{
-			// TODO: Add logging
+			_logger.LogError(ex, "Method: {method} - Exception: {message}", nameof(CreateMember), ex.Message);
 
 			return;
 		}
@@ -58,6 +63,8 @@
 
 	private void navigateBack()
 	{
+		_logger.LogInformation("Method: {method}", nameof(navigateBack));
+
 		navigationManager.NavigateTo("/members");
 	}
 }
