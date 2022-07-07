@@ -261,7 +261,7 @@ namespace ChessClub.Service
 
                         if (count != 2)
                         {
-                            _logger.LogError("Error saving draw result: {count}", count);
+                            _logger.LogError("Error saving result: {count}", count);
                             await transaction.RollbackAsync();
                             return false;
                         }
@@ -285,7 +285,7 @@ namespace ChessClub.Service
 
                             if (count != membersToUpdate + 1)
                             {
-                                _logger.LogError("Error saving draw result: {count}", count);
+                                _logger.LogError("Error saving result: {count}", count);
                                 await transaction.RollbackAsync();
                                 return false;
                             }
