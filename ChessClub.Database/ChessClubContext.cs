@@ -28,7 +28,7 @@ namespace ChessClub.Database
             if (System.Diagnostics.Debugger.IsAttached)
             {
                 optionsBuilder.UseLoggerFactory(_loggerFactory)
-                .EnableSensitiveDataLogging();
+                    .EnableSensitiveDataLogging();
             }
         }
     }

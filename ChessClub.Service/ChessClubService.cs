@@ -192,7 +192,7 @@ namespace ChessClub.Service
 
                 if (count != 2)
                 {
-                    _logger.LogError("Error saving draw result: {count}", count);
+                    _logger.LogError("Error saving result: {count}", count);
                     await transaction.RollbackAsync();
                     return false;
                 }
@@ -215,7 +215,6 @@ namespace ChessClub.Service
                         swapMember.CurrentRank += 1;
                         lowerPositionMember.CurrentRank -= 1;
 
-                        //_chessClubContext.Members.UpdateRange(new List<Member>() { swapMember, lowerPositionMember });
                         count = await _chessClubContext.SaveChangesAsync();
 
                         if (count != 2)
@@ -231,7 +230,9 @@ namespace ChessClub.Service
                     var winningMember = members.First(m => m.Id == winner);
                     var winningPosition = winningMember.CurrentRank;
 
-                    var losingMember = members.First(m => m.Id != winner);
+                    var losingMemberId = (player1 == winner) ? player2 : player1;
+
+                    var losingMember = members.First(m => m.Id == losingMemberId);
                     var losingPosition = losingMember.CurrentRank;
 
                     double positionDifference = (double)(winningPosition - losingPosition);

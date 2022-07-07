@@ -62,8 +62,6 @@
 	{
 		_logger.LogInformation("Method: {method}", nameof(Update));
 
-		// TODO: Add some validation on _memberToUpdate.
-
 		try
 		{
 			var result = await _chessClubClient.UpdateMemberAsync(_memberToUpdate);

@@ -45,8 +45,6 @@
 	{
 		_logger.LogInformation("Method: {method}", nameof(CreateMember));
 
-		// TODO: Add some validation on _memberToCreate.
-
 		try
 		{
 			var result = await _chessClubClient.AddMemberAsync(_memberToCreate);

@@ -1,7 +1,6 @@
 ﻿using ChessClub.API.Models;
 using ChessClub.Database.Models;
 using ChessClub.Service;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChessClub.API.Controllers
@@ -23,7 +22,7 @@ namespace ChessClub.API.Controllers
         [HttpGet("Members")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetMembersResponse))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetMembers([FromQuery]int pageNumber, [FromQuery]int pageSize)
+        public async Task<IActionResult> GetMembers([FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
             try
             {
